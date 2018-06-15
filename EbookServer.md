@@ -1,7 +1,4 @@
-## Setting up a Pi Zero to act as a Mass Storage Ebook Server
+# Set up RasPi Zero as a standalone COPS server that will emulate USB storage for database edits and access
 
-This should give you a Zero that emulates a usb storage device and broadcasts an access point that hosts a Ebook Server.
-
-```
-This should be some code
-```
+##### Install Raspbian Lite and initial setup
+Download Rasbian Lite image and write to your SD card.
