@@ -112,3 +112,25 @@
       `sudo nano index.php`
       Add `<?php echo phpinfo(); ?>` to that file and save it.
    - Refresh your browser or go back to http://raspberrypi.local and make sure you see PHP info.
+5. Install COPS
+   - Make sure you are in your home directory `cd ~`
+   - Download and unzip COPS:
+      ```
+      wget https://github.com/seblucas/cops/releases/download/1.1.1/cops-1.1.1.zip
+      mkdir cops
+      mv ./cops-1.1.1.zip ./cops
+      cd ./cops
+      unzip cops-1.1.1.zip
+      ```
+   - Move COPS to our /var/www/html directory so nginx can see it:
+      ```
+      cd ~
+      sudo mv ./cops /var/www/html/
+      ```
+   - Setup the COPS configuration file
+      ```
+      cd /var/www/html/cops
+      cp config_local.php.example config_local.php
+      ```
+   - Edit the configuration file so `$config['calibre_directory'] = './';` looks like `'$config['calibre_directory'] = '/home/pi/library/'` Be certain you have the trailing /
+   - Go to http://raspberrypi.local/cops/ You should see a config check page for COPS complaining that it cannot find the Calibre database file. That is fine. We are going to fix that next.
