@@ -114,6 +114,7 @@
    - Refresh your browser or go back to http://raspberrypi.local and make sure you see PHP info.
 5. Install COPS
    - Make sure you are in your home directory `cd ~`
+   - Create a folder in your home directory for the Calibre library to be mounted to. `mkdir /home/pi/library`
    - Download and unzip COPS:
       ```
       wget https://github.com/seblucas/cops/releases/download/1.1.1/cops-1.1.1.zip
@@ -134,3 +135,30 @@
       ```
    - Edit the configuration file so `$config['calibre_directory'] = './';` looks like `'$config['calibre_directory'] = '/home/pi/library/'` Be certain you have the trailing /
    - Go to http://raspberrypi.local/cops/ You should see a config check page for COPS complaining that it cannot find the Calibre database file. That is fine. We are going to fix that next.
+   
+##### Set up USB Mass Storage Mode
+1. First we have to remove the OTG Ethernet driver we installed initially. We will still be able to communicate with the PI via its WiFi that it is broadcasting.
+   - Change directory to /boot/ and edit the `cmdline.txt` file. Remove `g_ether.host_addr=36:7c:9b:c8:63:00`
+   - Reboot the Pi and reconnect to the WiFi
+2. The USB device that your computer will see is actually a file that is on the Rasberry Pi. We need to create that file and isntall a file system on it.
+   - Create a 2GB file in your home directory called piusb.bin
+      ```
+      dd if=/dev/zero of=./piusb.bin bs=1M count=2000
+      ```
+      This will take a long time to complete. It is creating a file filled with zeros that is 2 gigabytes in size.
+   - Next we have to put a filesystem into that file. The recommeded file system for a USB stick is FAT32 or VFAT.
+      `mkfs.vfat ./piusb.bin -n Calibre`
+3. Now we have a file that will mount to your computer when the Pi is plugged in. We just need to enable the USB mass storage mode.
+   - Open `/etc/rc.local` in nano and go to the bottom. Before the `exit 0` line add:
+      ```
+      # Setup USB Mass Storage Stuff
+      losetup /dev/loop0 /home/pi/piusb.bin
+      mount -o ro,uid=1000,gid=1000 /dev/loop0 /home/pi/library
+      modprobe g_mass_storage file=/dev/loop0 removeable=1 ro=0 stall=0
+      ```
+      This will cause losetup to mount your image file to a loop device, mount will mount that loop device to your COPS library directory, then modprobe will load the mass_storage kernel module and activate it. This will happen at boot every time.
+   - Power off your Pi. `sudo poweroff`
+   - Disconnect the power cable from your Pi if you are using one. Connect a cable from the USB on your computer to the USB on the Pi. This will power the Pi and also allow your computer to see the Pi as a USB device.
+   
+##### Load your Calibre library onto the Pi
+1. Boot up your Pi and wait for your computer to see the USB drive. Once it is mounted Copy your entire Calibre directory to the drive. It may take a while depending on the size of your directory. Once done copying you should be able to go to http://raspberrypi.local/cops/ and see your books. 
